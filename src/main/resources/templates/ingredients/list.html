@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head th:replace="~{layout :: head('Ингредиенты')}"></head>
+<body>
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="mb-0">Ингредиенты</h1>
+        <a class="btn btn-primary" th:if="${currentUser != null}" th:href="@{/ingredients/new}">Добавить</a>
+    </div>
+
+    <form class="row g-2 mb-3" method="get" th:action="@{/ingredients}">
+        <div class="col-auto">
+            <input class="form-control" type="text" name="q" th:value="${q}" placeholder="Поиск по названию">
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-outline-secondary" type="submit">Найти</button>
+            <a class="btn btn-link" th:href="@{/ingredients}">Сбросить</a>
+        </div>
+    </form>
+
+    <table class="table table-striped align-middle">
+        <thead>
+        <tr>
+            <th>Название</th>
+            <th>Единица измерения</th>
+            <th class="text-end">Действия</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="ingredient : ${ingredients}">
+            <td>
+                <a th:href="@{/ingredients/{id}(id=${ingredient.id})}" th:text="${ingredient.name}">name</a>
+            </td>
+            <td th:text="${ingredient.unit}">unit</td>
+            <td class="text-end">
+                <a class="btn btn-sm btn-outline-secondary"
+                   th:if="${currentUser != null}"
+                   th:href="@{/ingredients/{id}/edit(id=${ingredient.id})}">Изменить</a>
+                <form class="d-inline"
+                      th:if="${currentUser != null}"
+                      th:action="@{/ingredients/{id}/delete(id=${ingredient.id})}"
+                      method="post">
+                    <button class="btn btn-sm btn-outline-danger" type="submit">Удалить</button>
+                </form>
+            </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(ingredients)}">
+            <td colspan="3" class="text-center text-muted">Ничего не найдено</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<div th:replace="~{layout :: footer}"></div>
+</body>
+</html>

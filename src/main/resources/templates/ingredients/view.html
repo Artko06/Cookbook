@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head th:replace="~{layout :: head(${ingredient.name})}"></head>
+<body>
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<div class="container" style="max-width: 640px;">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/ingredients}">Ингредиенты</a></li>
+            <li class="breadcrumb-item active" th:text="${ingredient.name}">name</li>
+        </ol>
+    </nav>
+
+    <h1 th:text="${ingredient.name}">name</h1>
+    <p class="text-muted">
+        Единица измерения по умолчанию: <span th:text="${ingredient.unit}">unit</span>
+    </p>
+
+    <div th:if="${currentUser != null}">
+        <a class="btn btn-outline-secondary" th:href="@{/ingredients/{id}/edit(id=${ingredient.id})}">Изменить</a>
+        <form class="d-inline" th:action="@{/ingredients/{id}/delete(id=${ingredient.id})}" method="post">
+            <button class="btn btn-outline-danger" type="submit">Удалить</button>
+        </form>
+    </div>
+</div>
+
+<div th:replace="~{layout :: footer}"></div>
+</body>
+</html>

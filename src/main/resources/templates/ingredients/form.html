@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head th:replace="~{layout :: head('Ингредиент')}"></head>
+<body>
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<div class="container" style="max-width: 520px;">
+    <h1 class="mb-4" th:text="${ingredientId != null} ? 'Редактирование ингредиента' : 'Новый ингредиент'">Ингредиент</h1>
+
+    <form th:object="${ingredientForm}" method="post" th:action="@{${formAction}}">
+        <div class="mb-3">
+            <label class="form-label" for="name">Название</label>
+            <input class="form-control" type="text" id="name" th:field="*{name}">
+            <div class="text-danger small" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="unit">Единица измерения</label>
+            <input class="form-control" type="text" id="unit" th:field="*{unit}" placeholder="г, мл, шт">
+            <div class="text-danger small" th:if="${#fields.hasErrors('unit')}" th:errors="*{unit}"></div>
+        </div>
+        <button class="btn btn-primary" type="submit">Сохранить</button>
+        <a class="btn btn-link" th:href="@{/ingredients}">Отмена</a>
+    </form>
+</div>
+
+<div th:replace="~{layout :: footer}"></div>
+</body>
+</html>
