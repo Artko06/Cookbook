@@ -1,11 +1,19 @@
 package org.example.cookbook.service;
 
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import org.example.cookbook.domain.Ingredient;
 import org.example.cookbook.domain.Recipe;
+import org.example.cookbook.domain.RecipeIngredient;
 import org.example.cookbook.domain.User;
 import org.example.cookbook.dto.RecipeForm;
+import org.example.cookbook.dto.RecipeIngredientForm;
 import org.example.cookbook.dto.RecipeListItem;
 import org.example.cookbook.exception.NotFoundException;
+import org.example.cookbook.repository.IngredientRepository;
 import org.example.cookbook.repository.RecipeRepository;
 import org.example.cookbook.repository.UserRepository;
 import org.springframework.security.access.AccessDeniedException;
@@ -17,10 +25,12 @@ public class RecipeService {
 
     private final RecipeRepository recipes;
     private final UserRepository users;
+    private final IngredientRepository ingredients;
 
-    public RecipeService(RecipeRepository recipes, UserRepository users) {
+    public RecipeService(RecipeRepository recipes, UserRepository users, IngredientRepository ingredients) {
         this.recipes = recipes;
         this.users = users;
+        this.ingredients = ingredients;
     }
 
     @Transactional(readOnly = true)
@@ -50,6 +60,7 @@ public class RecipeService {
         Recipe recipe = new Recipe();
         apply(recipe, form);
         recipe.setAuthor(author);
+        applyComposition(recipe, form.getIngredients());
         return recipes.save(recipe);
     }
 
@@ -58,6 +69,7 @@ public class RecipeService {
         Recipe recipe = get(id);
         requireAuthor(recipe, username);
         apply(recipe, form);
+        applyComposition(recipe, form.getIngredients());
         return recipes.save(recipe);
     }
 
@@ -74,6 +86,37 @@ public class RecipeService {
         recipe.setInstructions(blankToNull(form.getInstructions()));
         recipe.setServings(form.getServings());
         recipe.setCookingTimeMin(form.getCookingTimeMin());
+    }
+
+    private void applyComposition(Recipe recipe, List<RecipeIngredientForm> formLines) {
+        List<RecipeIngredientForm> lines = formLines == null ? List.of() : formLines;
+
+        Set<Long> targetIds = lines.stream()
+                .filter(line -> line != null && line.getIngredientId() != null)
+                .map(RecipeIngredientForm::getIngredientId)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        Map<Long, RecipeIngredient> current = recipe.getIngredients().stream()
+                .collect(Collectors.toMap(line -> line.getIngredient().getId(), line -> line));
+
+        recipe.getIngredients().removeIf(line -> !targetIds.contains(line.getIngredient().getId()));
+
+        for (RecipeIngredientForm formLine : lines) {
+            if (formLine == null || formLine.getIngredientId() == null) {
+                continue;
+            }
+            RecipeIngredient line = current.get(formLine.getIngredientId());
+            if (line == null) {
+                Ingredient ingredient = ingredients.findById(formLine.getIngredientId())
+                        .orElseThrow(() -> new NotFoundException("Ингредиент не найден: " + formLine.getIngredientId()));
+                line = new RecipeIngredient();
+                line.setIngredient(ingredient);
+                recipe.addIngredient(line);
+            }
+            line.setQuantity(formLine.getQuantity());
+            line.setUnit(blankToNull(formLine.getUnit()));
+            line.setNote(blankToNull(formLine.getNote()));
+        }
     }
 
     private void requireAuthor(Recipe recipe, String username) {

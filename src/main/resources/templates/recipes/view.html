@@ -24,6 +24,29 @@
 
     <p th:if="${!#strings.isEmpty(recipe.description)}" th:text="${recipe.description}">description</p>
 
+    <div th:if="${!#lists.isEmpty(recipe.ingredients)}">
+        <h4>Состав</h4>
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Ингредиент</th>
+                <th>Количество</th>
+                <th>Примечание</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="line : ${recipe.ingredients}">
+                <td th:text="${line.ingredient.name}">ingredient</td>
+                <td>
+                    <span th:text="${line.quantity}">0</span>
+                    <span th:text="${line.unit != null ? line.unit : line.ingredient.unit}">unit</span>
+                </td>
+                <td th:text="${line.note}">note</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
     <div th:if="${!#strings.isEmpty(recipe.instructions)}">
         <h4>Инструкция</h4>
         <p style="white-space: pre-line" th:text="${recipe.instructions}">instructions</p>

@@ -1,8 +1,11 @@
 package org.example.cookbook.dto;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import java.util.ArrayList;
+import java.util.List;
 
 public class RecipeForm {
 
@@ -19,6 +22,9 @@ public class RecipeForm {
 
     @Min(value = 1, message = "Время готовки должно быть не меньше 1 минуты")
     private Integer cookingTimeMin;
+
+    @Valid
+    private List<RecipeIngredientForm> ingredients = new ArrayList<>();
 
     public String getTitle() {
         return title;
@@ -58,5 +64,13 @@ public class RecipeForm {
 
     public void setCookingTimeMin(Integer cookingTimeMin) {
         this.cookingTimeMin = cookingTimeMin;
+    }
+
+    public List<RecipeIngredientForm> getIngredients() {
+        return ingredients;
+    }
+
+    public void setIngredients(List<RecipeIngredientForm> ingredients) {
+        this.ingredients = ingredients;
     }
 }

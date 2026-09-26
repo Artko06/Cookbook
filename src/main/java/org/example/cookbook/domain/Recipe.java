@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -51,6 +52,7 @@ public class Recipe {
     private Instant updatedAt;
 
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("id ASC")
     private List<RecipeIngredient> ingredients = new ArrayList<>();
 
     @PrePersist
@@ -63,11 +65,6 @@ public class Recipe {
     @PreUpdate
     void onUpdate() {
         updatedAt = Instant.now();
-    }
-
-    public void replaceIngredients(List<RecipeIngredient> newIngredients) {
-        ingredients.clear();
-        newIngredients.forEach(this::addIngredient);
     }
 
     public void addIngredient(RecipeIngredient ingredient) {

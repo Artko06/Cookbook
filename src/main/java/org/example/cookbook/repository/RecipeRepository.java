@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface RecipeRepository extends JpaRepository<Recipe, Long> {
 
-    @EntityGraph(attributePaths = "author")
+    @EntityGraph(attributePaths = {"author", "ingredients", "ingredients.ingredient"})
     Optional<Recipe> findWithAuthorById(Long id);
 
     List<Recipe> findAllByOrderByCreatedAtDesc();
