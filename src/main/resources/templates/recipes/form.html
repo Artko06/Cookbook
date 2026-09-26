@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head th:replace="~{layout :: head('Рецепт')}"></head>
+<body>
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<div class="container" style="max-width: 720px;">
+    <h1 class="mb-4" th:text="${recipeId != null} ? 'Редактирование рецепта' : 'Новый рецепт'">Рецепт</h1>
+
+    <form th:object="${recipeForm}" method="post" th:action="@{${formAction}}">
+        <div class="mb-3">
+            <label class="form-label" for="title">Название</label>
+            <input class="form-control" type="text" id="title" th:field="*{title}">
+            <div class="text-danger small" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="description">Описание</label>
+            <textarea class="form-control" id="description" rows="3" th:field="*{description}"></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="instructions">Инструкция</label>
+            <textarea class="form-control" id="instructions" rows="6" th:field="*{instructions}"></textarea>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label" for="servings">Порций</label>
+                <input class="form-control" type="number" id="servings" min="1" th:field="*{servings}">
+                <div class="text-danger small" th:if="${#fields.hasErrors('servings')}" th:errors="*{servings}"></div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label" for="cookingTimeMin">Время готовки, мин</label>
+                <input class="form-control" type="number" id="cookingTimeMin" min="1" th:field="*{cookingTimeMin}">
+                <div class="text-danger small" th:if="${#fields.hasErrors('cookingTimeMin')}" th:errors="*{cookingTimeMin}"></div>
+            </div>
+        </div>
+
+        <button class="btn btn-primary" type="submit">Сохранить</button>
+        <a class="btn btn-link" th:href="@{/recipes}">Отмена</a>
+    </form>
+</div>
+
+<div th:replace="~{layout :: footer}"></div>
+</body>
+</html>

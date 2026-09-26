@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head th:replace="~{layout :: head(${recipe.title})}"></head>
+<body>
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<div class="container" style="max-width: 760px;">
+    <h1 th:text="${recipe.title}">title</h1>
+
+    <p class="text-muted">
+        Автор:
+        <a th:href="@{/users/{username}(username=${recipe.author.username})}"
+           th:text="${recipe.author.username}">author</a>
+        <span th:if="${recipe.cookingTimeMin != null}" th:text="| · ${recipe.cookingTimeMin} мин|"></span>
+        <span th:text="| · ${recipe.servings} порц.|"></span>
+    </p>
+
+    <div class="mb-4" th:if="${canEdit}">
+        <a class="btn btn-outline-secondary" th:href="@{/recipes/{id}/edit(id=${recipe.id})}">Редактировать</a>
+        <form class="d-inline" th:action="@{/recipes/{id}/delete(id=${recipe.id})}" method="post">
+            <button class="btn btn-outline-danger" type="submit">Удалить</button>
+        </form>
+    </div>
+
+    <p th:if="${!#strings.isEmpty(recipe.description)}" th:text="${recipe.description}">description</p>
+
+    <div th:if="${!#strings.isEmpty(recipe.instructions)}">
+        <h4>Инструкция</h4>
+        <p style="white-space: pre-line" th:text="${recipe.instructions}">instructions</p>
+    </div>
+</div>
+
+<div th:replace="~{layout :: footer}"></div>
+</body>
+</html>
