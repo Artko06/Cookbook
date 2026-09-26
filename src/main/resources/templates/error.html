@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head th:replace="~{layout :: head('Ошибка')}"></head>
+<body>
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<div class="container text-center py-5">
+    <h1 class="display-4" th:text="${status} ?: 'Ошибка'">Ошибка</h1>
+    <p class="lead" th:text="${!#strings.isEmpty(message) ? message : (!#strings.isEmpty(error) ? error : 'Что-то пошло не так')}">Что-то пошло не так</p>
+    <a class="btn btn-primary mt-3" th:href="@{/}">На главную</a>
+</div>
+
+<div th:replace="~{layout :: footer}"></div>
+</body>
+</html>

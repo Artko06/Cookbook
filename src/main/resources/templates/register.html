@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head th:replace="~{layout :: head('Регистрация')}"></head>
+<body>
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<div class="container" style="max-width: 480px;">
+    <h1 class="mb-4">Регистрация</h1>
+    <form th:action="@{/register}" th:object="${registerForm}" method="post">
+        <div class="mb-3">
+            <label class="form-label" for="username">Логин</label>
+            <input class="form-control" type="text" id="username" th:field="*{username}">
+            <div class="text-danger small" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="email">Email</label>
+            <input class="form-control" type="email" id="email" th:field="*{email}">
+            <div class="text-danger small" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="password">Пароль</label>
+            <input class="form-control" type="password" id="password" th:field="*{password}">
+            <div class="text-danger small" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="confirmPassword">Повторите пароль</label>
+            <input class="form-control" type="password" id="confirmPassword" th:field="*{confirmPassword}">
+            <div class="text-danger small" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"></div>
+            <div class="text-danger small" th:if="${#fields.hasErrors('passwordMatching')}" th:errors="*{passwordMatching}"></div>
+        </div>
+        <button class="btn btn-primary" type="submit">Зарегистрироваться</button>
+        <a class="btn btn-link" th:href="@{/login}">Уже есть аккаунт</a>
+    </form>
+</div>
+
+<div th:replace="~{layout :: footer}"></div>
+</body>
+</html>
