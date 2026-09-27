@@ -1,5 +1,12 @@
 body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
     background-color: #f8f9fa;
+}
+
+body > .container {
+    flex: 1 0 auto;
 }
 
 .navbar-brand {
@@ -9,4 +16,18 @@ body {
 .card {
     border: none;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    transition: box-shadow 0.15s ease-in-out, transform 0.15s ease-in-out;
+}
+
+.card:hover {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+}
+
+footer {
+    font-size: 0.9rem;
+}
+
+.table > :not(caption) > * > * {
+    vertical-align: middle;
 }

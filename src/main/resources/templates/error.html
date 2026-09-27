@@ -4,10 +4,27 @@
 <body>
 <nav th:replace="~{layout :: navbar}"></nav>
 
-<div class="container text-center py-5">
-    <h1 class="display-4" th:text="${status} ?: 'Ошибка'">Ошибка</h1>
-    <p class="lead" th:text="${!#strings.isEmpty(message) ? message : (!#strings.isEmpty(error) ? error : 'Что-то пошло не так')}">Что-то пошло не так</p>
-    <a class="btn btn-primary mt-3" th:href="@{/}">На главную</a>
+<div class="container py-5">
+    <div class="text-center">
+        <div class="display-1 fw-bold text-secondary" th:text="${status} ?: '!'">!</div>
+
+        <th:block th:switch="${status}">
+            <p class="lead" th:case="400">Некорректный запрос</p>
+            <p class="lead" th:case="403">Доступ запрещён</p>
+            <p class="lead" th:case="404">Страница не найдена</p>
+            <p class="lead" th:case="409">Конфликт данных</p>
+            <p class="lead" th:case="500">Внутренняя ошибка сервера</p>
+            <p class="lead" th:case="*">Что-то пошло не так</p>
+        </th:block>
+
+        <p class="text-muted" th:if="${!#strings.isEmpty(message)}" th:text="${message}"></p>
+        <p class="text-muted" th:if="${path != null}" th:text="|Путь: ${path}|"></p>
+
+        <div class="mt-3">
+            <a class="btn btn-primary" th:href="@{/}">На главную</a>
+            <a class="btn btn-outline-secondary" th:href="@{/recipes}">К рецептам</a>
+        </div>
+    </div>
 </div>
 
 <div th:replace="~{layout :: footer}"></div>
