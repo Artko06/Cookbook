@@ -2,8 +2,7 @@ CREATE TABLE users (
     id            BIGSERIAL PRIMARY KEY,
     username      VARCHAR(50)  UNIQUE NOT NULL,
     email         VARCHAR(120) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
-    created_at    TIMESTAMPTZ  NOT NULL DEFAULT now()
+    password_hash VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE ingredients (
@@ -19,9 +18,7 @@ CREATE TABLE recipes (
     instructions     TEXT,
     servings         INT          NOT NULL DEFAULT 1,
     cooking_time_min INT,
-    author_id        BIGINT       NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    created_at       TIMESTAMPTZ  NOT NULL DEFAULT now(),
-    updated_at       TIMESTAMPTZ
+    author_id        BIGINT       NOT NULL REFERENCES users(id) ON DELETE CASCADE
 );
 CREATE INDEX idx_recipes_author      ON recipes(author_id);
 CREATE INDEX idx_recipes_title_lower ON recipes(lower(title));

@@ -56,12 +56,12 @@ public class RecipeService {
     private Pageable pageable(int page, int size) {
         int safeSize = size <= 0 ? DEFAULT_PAGE_SIZE : Math.min(size, MAX_PAGE_SIZE);
         int safePage = Math.max(page, 0);
-        return PageRequest.of(safePage, safeSize, Sort.by(Sort.Direction.DESC, "createdAt"));
+        return PageRequest.of(safePage, safeSize, Sort.by(Sort.Direction.DESC, "id"));
     }
 
     @Transactional(readOnly = true)
     public Recipe get(Long id) {
-        return recipes.findWithAuthorById(id)
+        return recipes.findDetailedById(id)
                 .orElseThrow(() -> new NotFoundException("Рецепт не найден: " + id));
     }
 
@@ -73,23 +73,23 @@ public class RecipeService {
     }
 
     @Transactional
-    public Recipe create(RecipeForm form, String username) {
+    public void create(RecipeForm form, String username) {
         User author = users.findByUsername(username)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден: " + username));
         Recipe recipe = new Recipe();
         apply(recipe, form);
         recipe.setAuthor(author);
         applyComposition(recipe, form.getIngredients());
-        return recipes.save(recipe);
+        recipes.save(recipe);
     }
 
     @Transactional
-    public Recipe update(Long id, RecipeForm form, String username) {
+    public void update(Long id, RecipeForm form, String username) {
         Recipe recipe = get(id);
         requireAuthor(recipe, username);
         apply(recipe, form);
         applyComposition(recipe, form.getIngredients());
-        return recipes.save(recipe);
+        recipes.save(recipe);
     }
 
     @Transactional

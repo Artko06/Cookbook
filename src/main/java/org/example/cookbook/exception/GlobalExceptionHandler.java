@@ -20,7 +20,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AccessDeniedException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    public String handleAccessDenied(AccessDeniedException ex, Model model) {
+    public String handleAccessDenied(Model model) {
         model.addAttribute("status", HttpStatus.FORBIDDEN.value());
         model.addAttribute("message", "Доступ запрещён");
         return "error";

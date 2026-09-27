@@ -12,7 +12,7 @@ import org.springframework.data.repository.query.Param;
 public interface RecipeRepository extends JpaRepository<Recipe, Long> {
 
     @EntityGraph(attributePaths = {"author", "ingredients", "ingredients.ingredient"})
-    Optional<Recipe> findWithAuthorById(Long id);
+    Optional<Recipe> findDetailedById(Long id);
 
     @EntityGraph(attributePaths = "author")
     @Query(value = "select r from Recipe r where lower(r.title) like lower(concat('%', :q, '%'))",

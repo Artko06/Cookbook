@@ -43,19 +43,19 @@ public class IngredientService {
     }
 
     @Transactional
-    public Ingredient create(IngredientForm form) {
+    public void create(IngredientForm form) {
         Ingredient ingredient = new Ingredient();
         ingredient.setName(form.getName().trim());
         ingredient.setUnit(form.getUnit().trim());
-        return ingredients.save(ingredient);
+        ingredients.save(ingredient);
     }
 
     @Transactional
-    public Ingredient update(Long id, IngredientForm form) {
+    public void update(Long id, IngredientForm form) {
         Ingredient ingredient = get(id);
         ingredient.setName(form.getName().trim());
         ingredient.setUnit(form.getUnit().trim());
-        return ingredients.save(ingredient);
+        ingredients.save(ingredient);
     }
 
     @Transactional
