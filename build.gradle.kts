@@ -17,6 +17,8 @@ repositories {
     mavenCentral()
 }
 
+val mockitoAgent by configurations.creating
+
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
@@ -29,11 +31,23 @@ dependencies {
     runtimeOnly("org.postgresql:postgresql")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.testcontainers:testcontainers-junit-jupiter")
     testImplementation("org.testcontainers:testcontainers-postgresql")
+
+    mockitoAgent("org.mockito:mockito-core") { isTransitive = false }
 }
 
+val integrationTests = project.hasProperty("integration")
+
 tasks.withType<Test> {
-    useJUnitPlatform()
+    useJUnitPlatform {
+        if (!integrationTests) {
+            excludeTags("integration")
+        }
+    }
+    doFirst {
+        jvmArgs("-javaagent:${mockitoAgent.asPath}")
+    }
 }
