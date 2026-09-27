@@ -18,4 +18,7 @@ public interface RecipeRepository extends JpaRepository<Recipe, Long> {
     @Query(value = "select r from Recipe r where lower(r.title) like lower(concat('%', :q, '%'))",
             countQuery = "select count(r) from Recipe r where lower(r.title) like lower(concat('%', :q, '%'))")
     Page<Recipe> searchByTitle(@Param("q") String q, Pageable pageable);
+
+    @EntityGraph(attributePaths = "author")
+    Page<Recipe> findByAuthorUsername(String username, Pageable pageable);
 }

@@ -47,6 +47,18 @@ public class RecipeController {
         return "index";
     }
 
+    @GetMapping("/recipes/my")
+    public String my(@RequestParam(name = "page", defaultValue = "0") int page,
+                     @RequestParam(name = "size", defaultValue = "12") int size,
+                     Authentication authentication,
+                     Model model) {
+        Page<RecipeListItem> result = recipeService.byAuthor(authentication.getName(), page, size);
+        model.addAttribute("recipes", result.getContent());
+        model.addAttribute("page", result);
+        model.addAttribute("size", size);
+        return "recipes/my";
+    }
+
     @GetMapping("/recipes/new")
     public String createForm(@ModelAttribute("recipeForm") RecipeForm form, Model model) {
         prepareForm(model, "/recipes", null);

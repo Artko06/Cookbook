@@ -47,6 +47,12 @@ public class RecipeService {
                 .map(RecipeListItem::from);
     }
 
+    @Transactional(readOnly = true)
+    public Page<RecipeListItem> byAuthor(String username, int page, int size) {
+        return recipes.findByAuthorUsername(username, pageable(page, size))
+                .map(RecipeListItem::from);
+    }
+
     private Pageable pageable(int page, int size) {
         int safeSize = size <= 0 ? DEFAULT_PAGE_SIZE : Math.min(size, MAX_PAGE_SIZE);
         int safePage = Math.max(page, 0);
