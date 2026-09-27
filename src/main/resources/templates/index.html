@@ -10,6 +10,24 @@
         <a class="btn btn-primary" th:if="${currentUser != null}" th:href="@{/recipes/new}">Новый рецепт</a>
     </div>
 
+    <form class="row g-2 mb-4" method="get" th:action="@{/recipes}">
+        <div class="col-md-9">
+            <input class="form-control" type="text" name="q" th:value="${q}" placeholder="Поиск по названию">
+        </div>
+        <div class="col-md-3">
+            <select class="form-select" name="size">
+                <option value="6" th:selected="${size == 6}">6 на стр.</option>
+                <option value="12" th:selected="${size == 12}">12 на стр.</option>
+                <option value="24" th:selected="${size == 24}">24 на стр.</option>
+                <option value="48" th:selected="${size == 48}">48 на стр.</option>
+            </select>
+        </div>
+        <div class="col-12">
+            <button class="btn btn-outline-secondary" type="submit">Найти</button>
+            <a class="btn btn-link" th:href="@{/recipes}">Сбросить</a>
+        </div>
+    </form>
+
     <div class="row g-3">
         <div class="col-md-6 col-lg-4" th:each="item : ${recipes}">
             <div class="card h-100">
@@ -24,16 +42,32 @@
                            th:text="${item.authorUsername}">author</a>
                     </p>
                     <div class="mt-auto text-muted small">
-                        <span th:if="${item.cookingTimeMin != null}" th:text="|${item.cookingTimeMin} мин · |"></span>
+                        <span th:if="${item.cookingTimeMin != null}" th:text="|${item.cookingTimeMin} мин |"></span>
                         <span th:text="|${item.servings} порц.|"></span>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-12" th:if="${#lists.isEmpty(recipes)}">
-            <p class="text-muted">Рецептов пока нет.</p>
+            <p class="text-muted">Ничего не найдено.</p>
         </div>
     </div>
+
+    <nav class="mt-4" th:if="${page.totalPages > 1}">
+        <ul class="pagination">
+            <li class="page-item" th:classappend="${page.first} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/recipes(q=${q}, size=${size}, page=${page.number - 1})}">Назад</a>
+            </li>
+            <li class="page-item disabled">
+                <span class="page-link" th:text="|Стр. ${page.number + 1} из ${page.totalPages}|">1 / 1</span>
+            </li>
+            <li class="page-item" th:classappend="${page.last} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/recipes(q=${q}, size=${size}, page=${page.number + 1})}">Вперёд</a>
+            </li>
+        </ul>
+    </nav>
 </div>
 
 <div th:replace="~{layout :: footer}"></div>

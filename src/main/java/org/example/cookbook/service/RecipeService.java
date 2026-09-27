@@ -16,6 +16,10 @@ import org.example.cookbook.exception.NotFoundException;
 import org.example.cookbook.repository.IngredientRepository;
 import org.example.cookbook.repository.RecipeRepository;
 import org.example.cookbook.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,11 +37,20 @@ public class RecipeService {
         this.ingredients = ingredients;
     }
 
+    private static final int DEFAULT_PAGE_SIZE = 12;
+    private static final int MAX_PAGE_SIZE = 100;
+
     @Transactional(readOnly = true)
-    public List<RecipeListItem> feed() {
-        return recipes.findAllByOrderByCreatedAtDesc().stream()
-                .map(RecipeListItem::from)
-                .toList();
+    public Page<RecipeListItem> search(String q, int page, int size) {
+        String query = q == null ? "" : q.trim();
+        return recipes.searchByTitle(query, pageable(page, size))
+                .map(RecipeListItem::from);
+    }
+
+    private Pageable pageable(int page, int size) {
+        int safeSize = size <= 0 ? DEFAULT_PAGE_SIZE : Math.min(size, MAX_PAGE_SIZE);
+        int safePage = Math.max(page, 0);
+        return PageRequest.of(safePage, safeSize, Sort.by(Sort.Direction.DESC, "createdAt"));
     }
 
     @Transactional(readOnly = true)

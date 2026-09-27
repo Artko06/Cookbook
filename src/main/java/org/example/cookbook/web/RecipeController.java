@@ -8,8 +8,10 @@ import java.util.Set;
 import org.example.cookbook.domain.Recipe;
 import org.example.cookbook.dto.RecipeForm;
 import org.example.cookbook.dto.RecipeIngredientForm;
+import org.example.cookbook.dto.RecipeListItem;
 import org.example.cookbook.service.IngredientService;
 import org.example.cookbook.service.RecipeService;
+import org.springframework.data.domain.Page;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class RecipeController {
@@ -32,8 +35,15 @@ public class RecipeController {
     }
 
     @GetMapping({"/", "/recipes"})
-    public String feed(Model model) {
-        model.addAttribute("recipes", recipeService.feed());
+    public String feed(@RequestParam(name = "q", required = false) String q,
+                       @RequestParam(name = "page", defaultValue = "0") int page,
+                       @RequestParam(name = "size", defaultValue = "12") int size,
+                       Model model) {
+        Page<RecipeListItem> result = recipeService.search(q, page, size);
+        model.addAttribute("recipes", result.getContent());
+        model.addAttribute("page", result);
+        model.addAttribute("q", q);
+        model.addAttribute("size", size);
         return "index";
     }
 
