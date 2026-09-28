@@ -7,7 +7,7 @@
 ## Стек
 
 - Java 21, Spring Boot 4.1.1
-- Spring MVC + Thymeleaf + Bootstrap 5 (серверный рендеринг)
+- Spring MVC + Thymeleaf + Bootstrap 5
 - Spring Data JPA (Hibernate), PostgreSQL 16
 - Spring Security (form login), Spring Session JDBC (сессии в БД)
 - Flyway (миграции схемы), Gradle (Kotlin DSL)
