@@ -35,3 +35,9 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Env ###
+.env
+
+### Artifacts ###
+cookbook-src.zip

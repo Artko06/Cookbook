@@ -51,3 +51,7 @@ tasks.withType<Test> {
         jvmArgs("-javaagent:${mockitoAgent.asPath}")
     }
 }
+
+tasks.named<Jar>("jar") {
+    enabled = false
+}
