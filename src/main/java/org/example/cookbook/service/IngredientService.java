@@ -2,6 +2,8 @@ package org.example.cookbook.service;
 
 import java.util.List;
 import org.example.cookbook.domain.Ingredient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.example.cookbook.dto.IngredientForm;
 import org.example.cookbook.exception.IngredientInUseException;
 import org.example.cookbook.exception.NotFoundException;
@@ -12,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class IngredientService {
+
+    private static final Logger log = LoggerFactory.getLogger(IngredientService.class);
 
     private final IngredientRepository ingredients;
     private final RecipeIngredientRepository recipeIngredients;
@@ -48,6 +52,7 @@ public class IngredientService {
         ingredient.setName(form.getName().trim());
         ingredient.setUnit(form.getUnit().trim());
         ingredients.save(ingredient);
+        log.info("Ingredient created id={} name={}", ingredient.getId(), ingredient.getName());
     }
 
     @Transactional
@@ -56,15 +61,18 @@ public class IngredientService {
         ingredient.setName(form.getName().trim());
         ingredient.setUnit(form.getUnit().trim());
         ingredients.save(ingredient);
+        log.info("Ingredient updated id={} name={}", ingredient.getId(), ingredient.getName());
     }
 
     @Transactional
     public void delete(Long id) {
         Ingredient ingredient = get(id);
         if (recipeIngredients.existsByIngredientId(id)) {
+            log.warn("Ingredient delete blocked id={} name={}", id, ingredient.getName());
             throw new IngredientInUseException(
                     "Ингредиент «" + ingredient.getName() + "» используется в рецептах и не может быть удалён");
         }
         ingredients.delete(ingredient);
+        log.info("Ingredient deleted id={} name={}", id, ingredient.getName());
     }
 }

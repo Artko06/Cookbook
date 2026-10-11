@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.example.cookbook.domain.Ingredient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.example.cookbook.domain.Recipe;
 import org.example.cookbook.domain.RecipeIngredient;
 import org.example.cookbook.domain.User;
@@ -26,6 +28,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class RecipeService {
+
+    private static final Logger log = LoggerFactory.getLogger(RecipeService.class);
 
     private final RecipeRepository recipes;
     private final UserRepository users;
@@ -81,6 +85,7 @@ public class RecipeService {
         recipe.setAuthor(author);
         applyComposition(recipe, form.getIngredients());
         recipes.save(recipe);
+        log.info("Recipe created id={} title={} author={}", recipe.getId(), recipe.getTitle(), username);
     }
 
     @Transactional
@@ -90,6 +95,7 @@ public class RecipeService {
         apply(recipe, form);
         applyComposition(recipe, form.getIngredients());
         recipes.save(recipe);
+        log.info("Recipe updated id={} author={}", recipe.getId(), username);
     }
 
     @Transactional
@@ -97,6 +103,7 @@ public class RecipeService {
         Recipe recipe = get(id);
         requireAuthor(recipe, username);
         recipes.delete(recipe);
+        log.info("Recipe deleted id={} title={} author={}", id, recipe.getTitle(), username);
     }
 
     private void apply(Recipe recipe, RecipeForm form) {
@@ -140,6 +147,8 @@ public class RecipeService {
 
     private void requireAuthor(Recipe recipe, String username) {
         if (username == null || !recipe.getAuthor().getUsername().equals(username)) {
+            log.warn("Access denied: user={} tried to modify recipe id={} owned by {}",
+                    username, recipe.getId(), recipe.getAuthor().getUsername());
             throw new AccessDeniedException("Редактировать и удалять рецепт может только его автор");
         }
     }
