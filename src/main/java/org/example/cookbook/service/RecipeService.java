@@ -77,7 +77,7 @@ public class RecipeService {
     }
 
     @Transactional
-    public void create(RecipeForm form, String username) {
+    public Recipe create(RecipeForm form, String username) {
         User author = users.findByUsername(username)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден: " + username));
         Recipe recipe = new Recipe();
@@ -86,16 +86,18 @@ public class RecipeService {
         applyComposition(recipe, form.getIngredients());
         recipes.save(recipe);
         log.info("Recipe created id={} title={} author={}", recipe.getId(), recipe.getTitle(), username);
+        return recipe;
     }
 
     @Transactional
-    public void update(Long id, RecipeForm form, String username) {
+    public Recipe update(Long id, RecipeForm form, String username) {
         Recipe recipe = get(id);
         requireAuthor(recipe, username);
         apply(recipe, form);
         applyComposition(recipe, form.getIngredients());
         recipes.save(recipe);
         log.info("Recipe updated id={} author={}", recipe.getId(), username);
+        return recipe;
     }
 
     @Transactional
