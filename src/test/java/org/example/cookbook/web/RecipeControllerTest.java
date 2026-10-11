@@ -19,6 +19,7 @@ import org.example.cookbook.config.SecurityConfig;
 import org.example.cookbook.dto.RecipeForm;
 import org.example.cookbook.service.IngredientService;
 import org.example.cookbook.service.RecipeService;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -42,6 +43,7 @@ class RecipeControllerTest {
     private IngredientService ingredientService;
 
     @Test
+    @DisplayName("Гость видит ленту рецептов на главной странице")
     void guestSeesFeed() throws Exception {
         when(recipeService.search(isNull(), anyInt(), anyInt())).thenReturn(new PageImpl<>(List.of()));
 
@@ -51,6 +53,7 @@ class RecipeControllerTest {
     }
 
     @Test
+    @DisplayName("Гость не может открыть форму создания рецепта и перенаправляется на логин")
     void guestCannotOpenNewRecipeForm() throws Exception {
         mockMvc.perform(get("/recipes/new"))
                 .andExpect(status().is3xxRedirection())
@@ -58,6 +61,7 @@ class RecipeControllerTest {
     }
 
     @Test
+    @DisplayName("Не автор получает 403 при попытке редактирования рецепта")
     void nonAuthorCannotEdit() throws Exception {
         when(recipeService.getForEdit(1L, "other")).thenThrow(new AccessDeniedException("denied"));
 
@@ -67,6 +71,7 @@ class RecipeControllerTest {
     }
 
     @Test
+    @DisplayName("Автор создаёт рецепт и перенаправляется на список рецептов")
     void authorCreatesRecipe() throws Exception {
         mockMvc.perform(post("/recipes").with(user("author")).with(csrf())
                         .param("title", "Блины")

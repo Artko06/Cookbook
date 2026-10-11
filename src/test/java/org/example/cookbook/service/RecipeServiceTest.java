@@ -23,6 +23,7 @@ import org.example.cookbook.repository.IngredientRepository;
 import org.example.cookbook.repository.RecipeRepository;
 import org.example.cookbook.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.data.domain.Page;
@@ -46,6 +47,7 @@ class RecipeServiceTest {
     }
 
     @Test
+    @DisplayName("get бросает NotFoundException, если рецепт не найден")
     void getThrowsWhenRecipeMissing() {
         when(recipes.findDetailedById(9L)).thenReturn(Optional.empty());
 
@@ -53,6 +55,7 @@ class RecipeServiceTest {
     }
 
     @Test
+    @DisplayName("update запрещён пользователю, не являющемуся автором рецепта")
     void updateRejectsNonAuthor() {
         when(recipes.findDetailedById(1L)).thenReturn(Optional.of(recipeOf("author")));
 
@@ -62,6 +65,7 @@ class RecipeServiceTest {
     }
 
     @Test
+    @DisplayName("delete запрещён пользователю, не являющемуся автором рецепта")
     void deleteRejectsNonAuthor() {
         when(recipes.findDetailedById(1L)).thenReturn(Optional.of(recipeOf("author")));
 
@@ -71,6 +75,7 @@ class RecipeServiceTest {
     }
 
     @Test
+    @DisplayName("create сохраняет рецепт вместе с составом и автором")
     void createStoresRecipeWithComposition() {
         User author = new User();
         author.setUsername("author");
@@ -106,6 +111,7 @@ class RecipeServiceTest {
     }
 
     @Test
+    @DisplayName("search преобразует найденные рецепты в элементы страницы")
     void searchMapsRecipesToPageItems() {
         Recipe recipe = recipeOf("author");
         recipe.setTitle("Борщ");

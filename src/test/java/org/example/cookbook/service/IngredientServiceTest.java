@@ -16,6 +16,7 @@ import org.example.cookbook.exception.NotFoundException;
 import org.example.cookbook.repository.IngredientRepository;
 import org.example.cookbook.repository.RecipeIngredientRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -33,6 +34,7 @@ class IngredientServiceTest {
     }
 
     @Test
+    @DisplayName("get бросает NotFoundException, если ингредиент не найден")
     void getThrowsWhenIngredientMissing() {
         when(ingredients.findById(7L)).thenReturn(Optional.empty());
 
@@ -40,6 +42,7 @@ class IngredientServiceTest {
     }
 
     @Test
+    @DisplayName("delete запрещён, если ингредиент используется в рецептах")
     void deleteRejectsIngredientUsedInRecipes() {
         Ingredient ingredient = ingredient("мука", "г");
         when(ingredients.findById(1L)).thenReturn(Optional.of(ingredient));
@@ -50,6 +53,7 @@ class IngredientServiceTest {
     }
 
     @Test
+    @DisplayName("delete удаляет неиспользуемый ингредиент")
     void deleteRemovesUnusedIngredient() {
         Ingredient ingredient = ingredient("мука", "г");
         when(ingredients.findById(1L)).thenReturn(Optional.of(ingredient));
@@ -61,6 +65,7 @@ class IngredientServiceTest {
     }
 
     @Test
+    @DisplayName("findAll без запроса возвращает все ингредиенты по алфавиту")
     void findAllWithoutQueryReturnsAllSorted() {
         service.findAll(null);
 
@@ -68,6 +73,7 @@ class IngredientServiceTest {
     }
 
     @Test
+    @DisplayName("findAll с запросом обрезает пробелы и ищет по подстроке")
     void findAllWithQueryTrimsAndSearches() {
         service.findAll("  му  ");
 
@@ -75,6 +81,7 @@ class IngredientServiceTest {
     }
 
     @Test
+    @DisplayName("create обрезает пробелы в названии и единице измерения перед сохранением")
     void createTrimsAndSaves() {
         IngredientForm form = new IngredientForm();
         form.setName("  Соль  ");
