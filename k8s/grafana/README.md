@@ -1,0 +1,55 @@
+# Grafana + плагин VictoriaLogs в minikube
+
+Grafana, подключённая к Victoria Logs через официальный плагин
+`victoriametrics-logs-datasource`. Работает в namespace `cookbook`.
+Бонусный пункт задания (подключение официального Grafana-плагина Victoria Logs).
+
+## Состав
+- `00-pvc.yaml` — `PersistentVolumeClaim grafana-pvc` (1Gi) — данные Grafana (дашборды, установленный плагин);
+- `01-secret.yaml` — `Secret grafana-secret` (admin/admin);
+- `02-datasource-configmap.yaml` — `ConfigMap grafana-datasources` с provisioning datasource на `http://victoria-logs:9428`;
+- `03-deployment.yaml` — `Deployment grafana` (образ `grafana/grafana:12.0.2`, `GF_INSTALL_PLUGINS` = URL GitHub-релиза плагина, `fsGroup: 472`);
+- `04-service.yaml` — `Service grafana` (NodePort `30300`).
+
+> **Важно:** Grafana открывается только при включённом VPN — без него каталог
+> плагинов grafana.com недоступен (HTTP 451), и плагин не установится. Поэтому
+> плагин ставится из GitHub-релиза VictoriaMetrics напрямую.
+
+## Запуск
+```bash
+kubectl apply -f k8s/grafana/
+kubectl get pods -n cookbook -l app=grafana
+
+# дождаться установки плагина (Grafana ставит его при старте, нужен интернет)
+kubectl logs -n cookbook deploy/grafana | grep -i plugin
+```
+
+## Доступ
+```bash
+kubectl port-forward svc/grafana 3000:3000 -n cookbook
+# UI: http://localhost:3000  (admin / admin)
+# либо: minikube service grafana -n cookbook
+```
+
+Datasource **VictoriaLogs** подключается автоматически (provisioning), уже выставлен
+по умолчанию.
+
+## Проверка
+Grafana → **Explore** → datasource `VictoriaLogs` → LogsQL-запрос, например:
+```
+_time:1h level:ERROR
+_time:1h | stats by (level) count()
+```
+
+## Траблшутинг
+- `Error: ✗ 451` — каталог grafana.com недоступен (нет VPN); плагин должен тянуться
+  из GitHub-релиза (см. `03-deployment.yaml`).
+- Плагин не установился — нужен исходящий интернет из пода (или VPN):
+  `kubectl logs -n cookbook deploy/grafana | grep -iE 'plugin|download|451'`.
+- Datasource «unknown type» — плагин ещё не доустановился, подождать/перезапустить под.
+- Пусто в панели — проверить диапазон времени и имена полей (как в vmui).
+
+## Удаление
+```bash
+kubectl delete -f k8s/grafana/
+```

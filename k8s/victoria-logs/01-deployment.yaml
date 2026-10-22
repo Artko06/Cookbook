@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: victoria-logs
+  namespace: cookbook
+  labels:
+    app: victoria-logs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: victoria-logs
+  template:
+    metadata:
+      labels:
+        app: victoria-logs
+    spec:
+      containers:
+        - name: victoria-logs
+          image: victoriametrics/victoria-logs:v1.53.0
+          imagePullPolicy: IfNotPresent
+          args:
+            - -storageDataPath=/vlogs
+            - -retentionPeriod=7d
+            - -httpListenAddr=:9428
+          ports:
+            - name: http
+              containerPort: 9428
+          volumeMounts:
+            - name: data
+              mountPath: /vlogs
+          readinessProbe:
+            tcpSocket:
+              port: 9428
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 9428
+            initialDelaySeconds: 15
+            periodSeconds: 15
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: victoria-logs-pvc

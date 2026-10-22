@@ -24,5 +24,12 @@ server:
 logging:
   level:
     root: ${LOG_LEVEL:INFO}
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"
+    org.example.cookbook: DEBUG
+  structured:
+    format:
+      console: logstash
+    json:
+      add:
+        service.name: cookbook
+      rename:
+        "[@timestamp]": timestamp
