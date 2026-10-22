@@ -13,8 +13,10 @@ import org.example.cookbook.domain.Ingredient;
 import org.example.cookbook.dto.IngredientForm;
 import org.example.cookbook.exception.IngredientInUseException;
 import org.example.cookbook.exception.NotFoundException;
+import org.example.cookbook.metrics.CookbookMetrics;
 import org.example.cookbook.repository.IngredientRepository;
 import org.example.cookbook.repository.RecipeIngredientRepository;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,12 +27,16 @@ class IngredientServiceTest {
     private IngredientRepository ingredients;
     private RecipeIngredientRepository recipeIngredients;
     private IngredientService service;
+    private SimpleMeterRegistry registry;
+    private CookbookMetrics metrics;
 
     @BeforeEach
     void setUp() {
         ingredients = mock(IngredientRepository.class);
         recipeIngredients = mock(RecipeIngredientRepository.class);
-        service = new IngredientService(ingredients, recipeIngredients);
+        registry = new SimpleMeterRegistry();
+        metrics = new CookbookMetrics(registry);
+        service = new IngredientService(ingredients, recipeIngredients, metrics);
     }
 
     @Test
@@ -62,6 +68,7 @@ class IngredientServiceTest {
         service.delete(1L);
 
         verify(ingredients).delete(ingredient);
+        assertThat(registry.counter("cookbook.ingredients.deleted").count()).isEqualTo(1);
     }
 
     @Test
@@ -91,6 +98,7 @@ class IngredientServiceTest {
         service.create(form);
 
         verify(ingredients).save(captor.capture());
+        assertThat(registry.counter("cookbook.ingredients.created").count()).isEqualTo(1);
         assertThat(captor.getValue().getName()).isEqualTo("Соль");
         assertThat(captor.getValue().getUnit()).isEqualTo("г");
     }

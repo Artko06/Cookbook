@@ -1,5 +1,6 @@
 package org.example.cookbook.config;
 
+import org.example.cookbook.metrics.CookbookMetrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
@@ -12,9 +13,16 @@ public class SecurityEventListener {
 
     private static final Logger log = LoggerFactory.getLogger(SecurityEventListener.class);
 
+    private final CookbookMetrics metrics;
+
+    public SecurityEventListener(CookbookMetrics metrics) {
+        this.metrics = metrics;
+    }
+
     @EventListener
     public void onSuccess(AuthenticationSuccessEvent event) {
         log.info("Login success username={}", event.getAuthentication().getName());
+        metrics.loginSuccess();
     }
 
     @EventListener
@@ -22,5 +30,6 @@ public class SecurityEventListener {
         log.warn("Login failed username={} reason={}",
                 event.getAuthentication().getName(),
                 event.getException().getClass().getSimpleName());
+        metrics.loginFailure();
     }
 }

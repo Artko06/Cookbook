@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.example.cookbook.dto.IngredientForm;
 import org.example.cookbook.exception.IngredientInUseException;
+import org.example.cookbook.metrics.CookbookMetrics;
 import org.example.cookbook.exception.NotFoundException;
 import org.example.cookbook.repository.IngredientRepository;
 import org.example.cookbook.repository.RecipeIngredientRepository;
@@ -19,10 +20,12 @@ public class IngredientService {
 
     private final IngredientRepository ingredients;
     private final RecipeIngredientRepository recipeIngredients;
+    private final CookbookMetrics metrics;
 
-    public IngredientService(IngredientRepository ingredients, RecipeIngredientRepository recipeIngredients) {
+    public IngredientService(IngredientRepository ingredients, RecipeIngredientRepository recipeIngredients, CookbookMetrics metrics) {
         this.ingredients = ingredients;
         this.recipeIngredients = recipeIngredients;
+        this.metrics = metrics;
     }
 
     @Transactional(readOnly = true)
@@ -53,6 +56,7 @@ public class IngredientService {
         ingredient.setUnit(form.getUnit().trim());
         ingredients.save(ingredient);
         log.info("Ingredient created id={} name={}", ingredient.getId(), ingredient.getName());
+        metrics.ingredientCreated();
         return ingredient;
     }
 
@@ -76,5 +80,6 @@ public class IngredientService {
         }
         ingredients.delete(ingredient);
         log.info("Ingredient deleted id={} name={}", id, ingredient.getName());
+        metrics.ingredientDeleted();
     }
 }
