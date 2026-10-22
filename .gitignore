@@ -41,3 +41,7 @@ out/
 
 ### Artifacts ###
 cookbook-src.zip
+
+### Kubernetes secrets ###
+k8s/spring-boot/db-secret.env
+k8s/grafana/grafana-secret.env

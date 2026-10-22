@@ -6,18 +6,33 @@ Grafana, подключённая к Victoria Logs через официальн
 
 ## Состав
 - `00-pvc.yaml` — `PersistentVolumeClaim grafana-pvc` (1Gi) — данные Grafana (дашборды, установленный плагин);
-- `01-secret.yaml` — `Secret grafana-secret` (admin/admin);
-- `02-datasource-configmap.yaml` — `ConfigMap grafana-datasources` с provisioning datasource на `http://victoria-logs:9428`;
-- `03-deployment.yaml` — `Deployment grafana` (образ `grafana/grafana:12.0.2`, `GF_INSTALL_PLUGINS` = URL GitHub-релиза плагина, `fsGroup: 472`);
-- `04-service.yaml` — `Service grafana` (NodePort `30300`).
+- `01-datasource-configmap.yaml` — `ConfigMap grafana-datasources` с provisioning datasource на `http://victoria-logs:9428`;
+- `02-deployment.yaml` — `Deployment grafana` (образ `grafana/grafana:12.0.2`, `GF_INSTALL_PLUGINS` = URL GitHub-релиза плагина, `fsGroup: 472`, логин/пароль из `Secret grafana-secret`);
+- `03-service.yaml` — `Service grafana` (NodePort `30300`).
+
+`kustomization.yaml` собирает манифесты и генерирует `grafana-secret` из локального `grafana-secret.env` (не хранится в git).
 
 > **Важно:** Grafana открывается только при включённом VPN — без него каталог
 > плагинов grafana.com недоступен (HTTP 451), и плагин не установится. Поэтому
 > плагин ставится из GitHub-релиза VictoriaMetrics напрямую.
 
 ## Запуск
+
+Namespace `cookbook` должен существовать:
+
 ```bash
-kubectl apply -f k8s/grafana/
+kubectl apply -f k8s/spring-boot/00-namespace.yaml
+```
+
+Создайте `k8s/grafana/grafana-secret.env`:
+
+```env
+admin-user=admin
+admin-password=admin
+```
+
+```bash
+kubectl apply -k k8s/grafana/
 kubectl get pods -n cookbook -l app=grafana
 
 # дождаться установки плагина (Grafana ставит его при старте, нужен интернет)
@@ -43,7 +58,7 @@ _time:1h | stats by (level) count()
 
 ## Траблшутинг
 - `Error: ✗ 451` — каталог grafana.com недоступен (нет VPN); плагин должен тянуться
-  из GitHub-релиза (см. `03-deployment.yaml`).
+  из GitHub-релиза (см. `02-deployment.yaml`).
 - Плагин не установился — нужен исходящий интернет из пода (или VPN):
   `kubectl logs -n cookbook deploy/grafana | grep -iE 'plugin|download|451'`.
 - Datasource «unknown type» — плагин ещё не доустановился, подождать/перезапустить под.
@@ -51,5 +66,5 @@ _time:1h | stats by (level) count()
 
 ## Удаление
 ```bash
-kubectl delete -f k8s/grafana/
+kubectl delete -k k8s/grafana/
 ```

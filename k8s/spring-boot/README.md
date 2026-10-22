@@ -7,13 +7,14 @@ Spring Boot приложение (`app`) + PostgreSQL (`db`).
 | Файл | Объект | Назначение |
 |------|--------|-----------|
 | `00-namespace.yaml` | `Namespace cookbook` | пространство имён для всех ресурсов |
-| `01-db-secret.yaml` | `Secret db-secret` | логин/пароль/имя БД PostgreSQL |
-| `02-db-pvc.yaml` | `PersistentVolumeClaim db-pvc` | хранение данных БД (1Gi) |
-| `03-db-deployment.yaml` | `Deployment db` | PostgreSQL 16 (`postgres:16-alpine`) |
-| `04-db-service.yaml` | `Service db` | внутренний доступ к БД (ClusterIP:5432) |
-| `05-app-configmap.yaml` | `ConfigMap app-config` | несекретные настройки (`DB_URL`, порт, профиль) |
-| `06-app-deployment.yaml` | `Deployment app` | Spring Boot приложение (`cookbook-app:latest`) |
-| `07-app-service.yaml` | `Service app` | внешний доступ к UI (NodePort 30080) |
+| `01-db-pvc.yaml` | `PersistentVolumeClaim db-pvc` | хранение данных БД (1Gi) |
+| `02-db-deployment.yaml` | `Deployment db` | PostgreSQL 16 (`postgres:16-alpine`) |
+| `03-db-service.yaml` | `Service db` | внутренний доступ к БД (ClusterIP:5432) |
+| `04-app-configmap.yaml` | `ConfigMap app-config` | несекретные настройки (`DB_URL`, порт, профиль) |
+| `05-app-deployment.yaml` | `Deployment app` | Spring Boot приложение (`cookbook-app:latest`) |
+| `06-app-service.yaml` | `Service app` | внешний доступ к UI (NodePort 30080) |
+
+`kustomization.yaml` собирает манифесты и генерирует `db-secret` из локального `db-secret.env` (не хранится в git).
 
 ## Сборка образа в minikube
 ```bash
@@ -21,11 +22,20 @@ eval $(minikube docker-env)
 docker build -t cookbook-app:latest .
 docker images | grep cookbook-app
 ```
-`imagePullPolicy: IfNotPresent` в `06-app-deployment.yaml` — kubelet берёт локальный образ.
+`imagePullPolicy: IfNotPresent` в `05-app-deployment.yaml` — kubelet берёт локальный образ.
 
 ## Запуск
+
+Создайте `k8s/spring-boot/db-secret.env`:
+
+```env
+POSTGRES_DB=cookbook
+POSTGRES_USER=cookbook
+POSTGRES_PASSWORD=cookbook
+```
+
 ```bash
-kubectl apply -f k8s/spring-boot/
+kubectl apply -k k8s/spring-boot/
 
 # проверка
 kubectl get pods,pvc,svc -n cookbook
@@ -52,7 +62,7 @@ kubectl get pods -n cookbook
 
 ## Удаление
 ```bash
-kubectl delete -f k8s/spring-boot/
+kubectl delete -k k8s/spring-boot/
 ```
 
 ## Связь с другими частями
