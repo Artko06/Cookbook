@@ -47,21 +47,23 @@ public class IngredientService {
     }
 
     @Transactional
-    public void create(IngredientForm form) {
+    public Ingredient create(IngredientForm form) {
         Ingredient ingredient = new Ingredient();
         ingredient.setName(form.getName().trim());
         ingredient.setUnit(form.getUnit().trim());
         ingredients.save(ingredient);
         log.info("Ingredient created id={} name={}", ingredient.getId(), ingredient.getName());
+        return ingredient;
     }
 
     @Transactional
-    public void update(Long id, IngredientForm form) {
+    public Ingredient update(Long id, IngredientForm form) {
         Ingredient ingredient = get(id);
         ingredient.setName(form.getName().trim());
         ingredient.setUnit(form.getUnit().trim());
         ingredients.save(ingredient);
         log.info("Ingredient updated id={} name={}", ingredient.getId(), ingredient.getName());
+        return ingredient;
     }
 
     @Transactional
