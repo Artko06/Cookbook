@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: cookbook
+
+resources:
+  - 00-pvc.yaml
+  - 01-datasource-configmap.yaml
+  - 02-deployment.yaml
+  - 03-service.yaml
+
+secretGenerator:
+  - name: grafana-secret
+    envs:
+      - grafana-secret.env
+    options:
+      disableNameSuffixHash: true
