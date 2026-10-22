@@ -5,7 +5,6 @@ build
 *.iml
 HELP.md
 README.md
-Отчёт.md
-task1.md
-task2.md
+task/task1/Отчёт.md
+task/task1/task1.md
 src/test
