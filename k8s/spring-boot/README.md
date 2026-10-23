@@ -8,7 +8,7 @@ Spring Boot приложение (`app`) + PostgreSQL (`db`).
 |------|--------|-----------|
 | `00-namespace.yaml` | `Namespace cookbook` | пространство имён для всех ресурсов |
 | `01-db-pvc.yaml` | `PersistentVolumeClaim db-pvc` | хранение данных БД (1Gi) |
-| `02-db-deployment.yaml` | `Deployment db` | PostgreSQL 16 (`postgres:16-alpine`) |
+| `02-db-deployment.yaml` | `Deployment db` | PostgreSQL 16 (`postgres:16-alpine`) + sidecar `postgres-exporter` (порт 9187) |
 | `03-db-service.yaml` | `Service db` | внутренний доступ к БД (ClusterIP:5432) |
 | `04-app-configmap.yaml` | `ConfigMap app-config` | несекретные настройки (`DB_URL`, порт, профиль) |
 | `05-app-deployment.yaml` | `Deployment app` | Spring Boot приложение (`cookbook-app:latest`) |
@@ -50,6 +50,17 @@ kubectl logs deploy/app -n cookbook
 kubectl port-forward svc/app 8080:8080 -n cookbook   # http://localhost:8080
 # или
 minikube service app -n cookbook                     # NodePort 30080
+```
+
+## Метрики
+```bash
+# метрики приложения
+kubectl port-forward deploy/app -n cookbook 8081:8081
+curl localhost:8081/actuator/prometheus | grep cookbook_
+
+# метрики PostgreSQL
+kubectl port-forward deploy/db -n cookbook 9187:9187
+curl localhost:9187/metrics | grep pg_
 ```
 
 ## Масштабирование
