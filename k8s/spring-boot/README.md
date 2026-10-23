@@ -56,11 +56,11 @@ minikube service app -n cookbook                     # NodePort 30080
 ```bash
 # метрики приложения
 kubectl port-forward deploy/app -n cookbook 8081:8081
-curl localhost:8081/actuator/prometheus | grep cookbook_
+http://localhost:8081/actuator/prometheus
 
 # метрики PostgreSQL
 kubectl port-forward deploy/db -n cookbook 9187:9187
-curl localhost:9187/metrics | grep pg_
+http://localhost:9187/metrics
 ```
 
 ## Масштабирование
