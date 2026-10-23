@@ -1,0 +1,6 @@
+server:
+  scrape:
+    enabled: true
+  retentionPeriod: 7d
+  persistentVolume:
+    size: 2Gi
