@@ -19,9 +19,11 @@ import org.example.cookbook.dto.RecipeForm;
 import org.example.cookbook.dto.RecipeIngredientForm;
 import org.example.cookbook.dto.RecipeListItem;
 import org.example.cookbook.exception.NotFoundException;
+import org.example.cookbook.metrics.CookbookMetrics;
 import org.example.cookbook.repository.IngredientRepository;
 import org.example.cookbook.repository.RecipeRepository;
 import org.example.cookbook.repository.UserRepository;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -37,13 +39,17 @@ class RecipeServiceTest {
     private UserRepository users;
     private IngredientRepository ingredients;
     private RecipeService service;
+    private SimpleMeterRegistry registry;
+    private CookbookMetrics metrics;
 
     @BeforeEach
     void setUp() {
         recipes = mock(RecipeRepository.class);
         users = mock(UserRepository.class);
         ingredients = mock(IngredientRepository.class);
-        service = new RecipeService(recipes, users, ingredients);
+        registry = new SimpleMeterRegistry();
+        metrics = new CookbookMetrics(registry);
+        service = new RecipeService(recipes, users, ingredients, metrics);
     }
 
     @Test
@@ -100,6 +106,7 @@ class RecipeServiceTest {
         ArgumentCaptor<Recipe> captor = ArgumentCaptor.forClass(Recipe.class);
         service.create(form, "author");
         verify(recipes).save(captor.capture());
+        assertThat(registry.counter("cookbook.recipes.created").count()).isEqualTo(1);
 
         Recipe saved = captor.getValue();
         assertThat(saved.getTitle()).isEqualTo("Блины");

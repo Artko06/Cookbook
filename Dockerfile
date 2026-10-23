@@ -18,7 +18,8 @@ WORKDIR /app
 COPY --from=build /workspace/build/libs/*.jar app.jar
 
 ENV SERVER_PORT=8080
-EXPOSE 8080
+ENV MANAGEMENT_PORT=8081
+EXPOSE 8080 8081
 STOPSIGNAL SIGTERM
 
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]

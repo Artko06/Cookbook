@@ -1,6 +1,7 @@
 package org.example.cookbook.service;
 
 import org.example.cookbook.domain.User;
+import org.example.cookbook.metrics.CookbookMetrics;
 import org.example.cookbook.dto.RegisterForm;
 import org.example.cookbook.exception.NotFoundException;
 import org.example.cookbook.repository.UserRepository;
@@ -13,10 +14,12 @@ public class UserService {
 
     private final UserRepository users;
     private final PasswordEncoder passwordEncoder;
+    private final CookbookMetrics metrics;
 
-    public UserService(UserRepository users, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository users, PasswordEncoder passwordEncoder, CookbookMetrics metrics) {
         this.users = users;
         this.passwordEncoder = passwordEncoder;
+        this.metrics = metrics;
     }
 
     @Transactional
@@ -26,6 +29,7 @@ public class UserService {
         user.setEmail(form.getEmail());
         user.setPasswordHash(passwordEncoder.encode(form.getPassword()));
         users.save(user);
+        metrics.userRegistered();
     }
 
     @Transactional(readOnly = true)

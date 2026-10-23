@@ -17,6 +17,7 @@ import org.example.cookbook.dto.RecipeListItem;
 import org.example.cookbook.exception.NotFoundException;
 import org.example.cookbook.repository.IngredientRepository;
 import org.example.cookbook.repository.RecipeRepository;
+import org.example.cookbook.metrics.CookbookMetrics;
 import org.example.cookbook.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -34,11 +35,13 @@ public class RecipeService {
     private final RecipeRepository recipes;
     private final UserRepository users;
     private final IngredientRepository ingredients;
+    private final CookbookMetrics metrics;
 
-    public RecipeService(RecipeRepository recipes, UserRepository users, IngredientRepository ingredients) {
+    public RecipeService(RecipeRepository recipes, UserRepository users, IngredientRepository ingredients, CookbookMetrics metrics) {
         this.recipes = recipes;
         this.users = users;
         this.ingredients = ingredients;
+        this.metrics = metrics;
     }
 
     private static final int DEFAULT_PAGE_SIZE = 12;
@@ -86,6 +89,7 @@ public class RecipeService {
         applyComposition(recipe, form.getIngredients());
         recipes.save(recipe);
         log.info("Recipe created id={} title={} author={}", recipe.getId(), recipe.getTitle(), username);
+        metrics.recipeCreated();
         return recipe;
     }
 
@@ -97,6 +101,7 @@ public class RecipeService {
         applyComposition(recipe, form.getIngredients());
         recipes.save(recipe);
         log.info("Recipe updated id={} author={}", recipe.getId(), username);
+        metrics.recipeUpdated();
         return recipe;
     }
 
@@ -106,6 +111,7 @@ public class RecipeService {
         requireAuthor(recipe, username);
         recipes.delete(recipe);
         log.info("Recipe deleted id={} title={} author={}", id, recipe.getTitle(), username);
+        metrics.recipeDeleted();
     }
 
     private void apply(Recipe recipe, RecipeForm form) {
