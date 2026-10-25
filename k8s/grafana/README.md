@@ -1,12 +1,13 @@
-# Grafana + плагин VictoriaLogs в minikube
+# Grafana + VictoriaLogs + VictoriaMetrics в minikube
 
-Grafana, подключённая к Victoria Logs через официальный плагин
-`victoriametrics-logs-datasource`. Работает в namespace `cookbook`.
-Бонусный пункт задания (подключение официального Grafana-плагина Victoria Logs).
+Grafana, подключённая к Victoria Logs и Victoria Metrics. Работает в namespace
+`cookbook`. Для логов используется официальный плагин
+`victoriametrics-logs-datasource`, для метрик — стандартный datasource
+`Prometheus`.
 
 ## Состав
 - `00-pvc.yaml` — `PersistentVolumeClaim grafana-pvc` (1Gi) — данные Grafana (дашборды, установленный плагин);
-- `01-datasource-configmap.yaml` — `ConfigMap grafana-datasources` с provisioning datasource на `http://victoria-logs:9428`;
+- `01-datasource-configmap.yaml` — `ConfigMap grafana-datasources` с provisioning datasources на `http://victoria-logs:9428` и `http://vm-single-victoria-metrics-single-server.monitoring.svc:8428`;
 - `02-deployment.yaml` — `Deployment grafana` (образ `grafana/grafana:12.0.2`, `GF_INSTALL_PLUGINS` = URL GitHub-релиза плагина, `fsGroup: 472`, логин/пароль из `Secret grafana-secret`);
 - `03-service.yaml` — `Service grafana` (NodePort `30300`).
 
@@ -47,13 +48,20 @@ kubectl port-forward svc/grafana 3000:3000 -n cookbook
 ```
 
 Datasource **VictoriaLogs** подключается автоматически (provisioning), уже выставлен
-по умолчанию.
+по умолчанию. Datasource **VictoriaMetrics** типа `Prometheus` подключается
+к `http://vm-single-victoria-metrics-single-server.monitoring.svc:8428`.
 
 ## Проверка
 Grafana → **Explore** → datasource `VictoriaLogs` → LogsQL-запрос, например:
 ```
 _time:1h level:ERROR
 _time:1h | stats by (level) count()
+```
+
+Метрики: **Explore** → datasource `VictoriaMetrics` → PromQL, например:
+```promql
+up{namespace="cookbook"}
+cookbook_probe_runs_total
 ```
 
 ## Траблшутинг

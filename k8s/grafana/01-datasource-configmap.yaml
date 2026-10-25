@@ -14,3 +14,13 @@ data:
         isDefault: true
         jsonData:
           maxLines: 1000
+  vm.yml: |
+    apiVersion: 1
+    datasources:
+      - name: VictoriaMetrics
+        type: prometheus
+        access: proxy
+        url: http://vm-single-victoria-metrics-single-server.monitoring.svc:8428
+        isDefault: false
+        jsonData:
+          httpMethod: POST
