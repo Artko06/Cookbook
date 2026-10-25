@@ -78,4 +78,5 @@ kubectl delete -k k8s/spring-boot/
 
 ## Связь с другими частями
 - Доставка логов: `k8s/vector/` (DaemonSet Vector) → `k8s/victoria-logs/`.
+- Synthetic-проверка: `k8s/prober/` (порт `9090`, не пересекается с app `8080`).
 - Приложение ходит в БД по DNS-имени сервиса `db:5432` (`DB_URL` из `ConfigMap app-config`).
