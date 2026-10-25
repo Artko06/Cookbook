@@ -32,6 +32,10 @@ server:
   port: ${SERVER_PORT:8080}
   shutdown: graceful
 
+cookbook:
+  demo:
+    chaos-enabled: ${DEMO_CHAOS_ENABLED:false}
+
 logging:
   level:
     root: ${LOG_LEVEL:INFO}
