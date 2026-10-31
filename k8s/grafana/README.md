@@ -51,6 +51,13 @@ Datasource **VictoriaLogs** подключается автоматически 
 по умолчанию. Datasource **VictoriaMetrics** типа `Prometheus` подключается
 к `http://vm-single-victoria-metrics-single-server.monitoring.svc:8428`.
 
+## Дашборд
+
+Дашборд `SLI / SLO / SLA` лежит в `k8s/grafana/dashboards/SLI_SLO_SLA.json`.
+Импорт: **Dashboards → New → Import → Upload JSON**, затем выбрать datasource
+`VictoriaMetrics`. Файл экспортирован с «Export for sharing externally»,
+поэтому datasource подставляется при импорте.
+
 ## Проверка
 Grafana → **Explore** → datasource `VictoriaLogs` → LogsQL-запрос, например:
 ```
