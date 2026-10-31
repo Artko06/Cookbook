@@ -9,3 +9,4 @@ data:
   SPRING_PROFILES_ACTIVE: "dev"
   LOG_LEVEL: "INFO"
   DB_URL: "jdbc:postgresql://db:5432/cookbook"
+  DEMO_CHAOS_ENABLED: "false"
