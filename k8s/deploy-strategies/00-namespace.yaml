@@ -1,0 +1,7 @@
+# Отдельный namespace для стенда стратегий.
+# PostgreSQL, app-config, db-secret, мониторинг и legacy Deployment app
+# остаются в namespace cookbook.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cookbook-deploy

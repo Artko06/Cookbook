@@ -1,0 +1,32 @@
+# SHADOW / MIRROR.
+# Пользовательский трафик идёт на v1 и ответ приходит с v1. При этом КОПИЯ каждого
+# запроса зеркалится на v2 — она получает реальную нагрузку, но её ответы
+# пользователю НЕ возвращаются. Так новую версию проверяют боевым трафиком,
+# ничем не рискуя.
+#
+# Наблюдение: в логах/метриках v2 виден трафик
+# (http_server_requests_seconds_count{version="v2.0.0"} растёт), но curl
+# по-прежнему отвечает v1.0.0.
+#
+# Проверено вживую: на Envoy Gateway v1.10 RequestMirror работает со стандартными
+# CRD (experimental-канал не нужен). Если у вас старая версия Gateway API и фильтр
+# не принимается, установите experimental-канал CRD:
+#   kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.7.0/experimental-install.yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: cookbook
+  namespace: cookbook-deploy
+spec:
+  parentRefs:
+    - name: eg
+  rules:
+    - backendRefs:
+        - name: cookbook-v1   # отвечает пользователю
+          port: 80
+      filters:
+        - type: RequestMirror
+          requestMirror:
+            backendRef:
+              name: cookbook-v2   # получает копию трафика, ответ отбрасывается
+              port: 80

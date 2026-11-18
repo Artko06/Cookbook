@@ -1,0 +1,102 @@
+# Версия 1 приложения Cookbook (в стратегиях blue/green — «green», в canary — «stable»).
+# Приложение cookbook-app:
+#   :8080 — HTTP, отвечает «Кулинарная книга v1.0.0», X-App-Version, X-App-Instance
+#   :8081 — Actuator: /actuator/health/liveness, /actuator/health/readiness,
+#           метрики Prometheus (/actuator/prometheus), метрика
+#           http_server_requests_seconds_count{version=...}
+apiVersion: v1
+kind: Service
+metadata:
+  name: cookbook-v1
+  namespace: cookbook-deploy
+  labels:
+    app: cookbook
+    version: v1.0.0
+spec:
+  selector:
+    app: cookbook
+    version: v1.0.0
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+    - name: metrics
+      port: 8081
+      targetPort: metrics
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cookbook-v1
+  namespace: cookbook-deploy
+  labels:
+    app: cookbook
+    version: v1.0.0
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: cookbook
+      version: v1.0.0
+  template:
+    metadata:
+      labels:
+        app: cookbook
+        version: v1.0.0
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8081"
+        prometheus.io/path: "/actuator/prometheus"
+    spec:
+      containers:
+        - name: app
+          image: cookbook-app:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+            - name: metrics
+              containerPort: 8081
+          envFrom:
+            - configMapRef:
+                name: app-config
+          env:
+            - name: APP_VERSION
+              value: v1.0.0
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: POSTGRES_USER
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: POSTGRES_PASSWORD
+          startupProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: metrics
+            periodSeconds: 5
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: metrics
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: metrics
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi

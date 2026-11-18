@@ -1,0 +1,120 @@
+# ROLLING UPDATE — шаг 1: стартовая версия.
+# Один Deployment `cookbook`, Kubernetes сам постепенно заменяет поды при обновлении.
+# Gateway API здесь не дробит трафик — HTTPRoute просто всегда смотрит на сервис
+# `cookbook`, а состав подов за ним меняет контроллер Deployment.
+apiVersion: v1
+kind: Service
+metadata:
+  name: cookbook
+  namespace: cookbook-deploy
+  labels:
+    app: cookbook
+spec:
+  selector:
+    app: cookbook
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+    - name: metrics
+      port: 8081
+      targetPort: metrics
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cookbook
+  namespace: cookbook-deploy
+  labels:
+    app: cookbook
+spec:
+  replicas: 6
+  # strategy RollingUpdate — стратегия по умолчанию в Kubernetes.
+  #   maxSurge: 1        — на время обновления поднять 1 дополнительный под
+  #   maxUnavailable: 0  — не гасить старые поды, пока новый не станет Ready
+  # Итог: обновление без простоя, в один момент времени соседствуют v1 и v2.
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: cookbook
+  template:
+    metadata:
+      labels:
+        app: cookbook
+        version: v1.0.0   # метка версии на поде — по ней удобно смотреть поды
+                          # и логи, а version в метриках приложение ставит само
+                          # из APP_VERSION
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8081"
+        prometheus.io/path: "/actuator/prometheus"
+    spec:
+      containers:
+        - name: app
+          image: cookbook-app:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+            - name: metrics
+              containerPort: 8081
+          envFrom:
+            - configMapRef:
+                name: app-config
+          env:
+            - name: APP_VERSION
+              value: v1.0.0
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: POSTGRES_USER
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: POSTGRES_PASSWORD
+          startupProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: metrics
+            periodSeconds: 5
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: metrics
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: metrics
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: cookbook
+  namespace: cookbook-deploy
+spec:
+  parentRefs:
+    - name: eg
+  rules:
+    - backendRefs:
+        - name: cookbook
+          port: 80
