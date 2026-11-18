@@ -13,7 +13,7 @@ spring:
     enabled: true
   session:
     jdbc:
-      initialize-schema: always
+      initialize-schema: never
   thymeleaf:
     cache: false
 
@@ -27,6 +27,7 @@ management:
   metrics:
     tags:
       application: cookbook
+      version: ${APP_VERSION:dev}
 
 server:
   port: ${SERVER_PORT:8080}
