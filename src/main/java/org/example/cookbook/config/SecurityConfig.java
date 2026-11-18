@@ -31,7 +31,8 @@ public class SecurityConfig {
 
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/actuator/health", "/actuator/info", "/actuator/prometheus")
+                        .requestMatchers("/actuator/health", "/actuator/health/**",
+                                "/actuator/info", "/actuator/prometheus")
                         .permitAll()
                         .requestMatchers("/api/v1/recipes/my", "/api/v1/recipes/my/**").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/v1/chaos", "/api/v1/chaos/reset").permitAll()
