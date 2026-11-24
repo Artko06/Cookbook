@@ -1,0 +1,22 @@
+# HTTPRoute с распределением трафика по весам:
+#   90% — Service cookbook-v1 (v1.0.0)
+#   10% — Service cookbook-v2 (v2.0.0)
+#
+# Вес — это доля запросов, а не подов: Envoy делит трафик по весам,
+# а внутри выбранного Service распределяет его по эндпоинтам.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: cookbook
+  namespace: cookbook-deploy
+spec:
+  parentRefs:
+    - name: eg
+  rules:
+    - backendRefs:
+        - name: cookbook-v1
+          port: 80
+          weight: 90
+        - name: cookbook-v2
+          port: 80
+          weight: 10
